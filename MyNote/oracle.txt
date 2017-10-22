@@ -1,0 +1,1736 @@
+--------oracle 数据库基础-----------
+
+--这是单行注释
+/*
+这是多行注释
+*/
+
+/*
+SQL语句
+SQL是结构化查询语句，操作数据时需要向数据库发送SQL语句，数据库会理解SQL语句的含义并执行
+
+SQL语句分为：
+DDL（数据定义语言）：用来操作数据库对象
+        数据库对象：表，视图，索引，序列
+DML（数据库操作语言）：用来操作表中数据
+TCL（事务控制语言）：用来维护数据一致性的语句
+        TCL维护DML操作
+DQL（数据查询语言）：查询表中数据
+*/
+
+--不区分大小写，但应当养成一个好习惯，通常将关键字与非关键字用大小写区分开
+
+SELECT SYSDATE FROM dual
+
+DDL（数据定义语言）：用来增删改数据库对象
+创建表：
+CREATE TABLE employee_huo(
+  id NUMBER(4),
+  name VARCHAR2(20),
+  gender CHAR(1),
+  birth DATE,
+  salary NUMBER(6,2),
+  job VARCHAR2(30),
+  deptno NUMBER(2)
+);
+
+
+查看表结构
+DESC employee_huo
+
+给字段添加默认值，数据库中使用单引号
+数据库中所有字段无论是什么类型，默认值都是NULL，
+可以使用DEFAULT为字段单独指定默认值
+虽然SQL语句不区分大小写，但是字符串的值是区分大小写的
+CREATE TABLE employee_huo(
+  id NUMBER(4),
+  name VARCHAR2(20),
+  gender CHAR(1) DEFAULT 'M',
+  birth DATE,
+  salary NUMBER(6,2) DEFAULT 3000,
+  job VARCHAR2(30),
+  deptno NUMBER(2)
+);
+
+
+删除表
+DROP TABLE employee_huo
+
+NOT NULL:不允许为空
+当一个字段被设置NOT NULL约束后，该字段的值不允许为空
+CREATE TABLE employee_huo(
+  id NUMBER(4),
+  name VARCHAR2(20) NOT NULL,
+  gender CHAR(1) DEFAULT 'M',
+  birth DATE,
+  salary NUMBER(6,2) DEFAULT 3000,
+  job VARCHAR2(30),
+  deptno NUMBER(2)
+);
+
+DESC employee_huo
+
+
+修改表
+1：修改表名
+修改表名：
+RENAME old_name TO new_name
+例如：将employee_huo改名为myemp_huo
+RENAME employee_huo TO myemp_huo
+2：修改表结构
+2.1添加新的字段
+      需要注意，添加的字段只能被追加到表的最后一列中，不能在现有字段中间插入一个字段
+      在现有字段中间插入一个字段
+      为myemp表添加字段hiredate:
+ALTER TABLE myemp_huo
+ADD(
+  hiredate DATE
+)
+
+2.2删除字段   
+ALTER TABLE myemp_huo
+DROP(
+  hiredate
+)
+
+2.3修改现有字段
+可以修改字段的类型，长度，添加约束或设定默认值
+若表中已经存在数据，则不要修改字段的类型，长度尽可能只增不减，否则可能会修改失败
+ALTER TABLE myemp_huo
+MODIFY(
+  job VARCHAR2(40)
+)
+DESC myemp_huo
+
+DML语句：数据库操作语言
+用来增，删，改表中的数据。DML总是伴随事务（TCL）的
+1：INSERT语句
+用于向表中插入新的记录
+INSERT INTO myemp_huo
+(id,name,salary,job)
+VALUES
+(1,'huoxiao',3000,'CEO')
+
+
+
+SELECT * FROM myemp_huo
+
+
+提交工作流程
+COMMIT
+
+
+插入数据时，可以不指定字段名，若不指定，则是全列插入。缺少提示：没有足够的值
+INSERT INTO myemp_huo
+VALUES
+(2,'rose','F',SYSDATE,3300,'CLERK',10)
+
+插入日期类型数据时，建议使用函数TO_DATE
+该函数可以将一个字符串按照指定的日期格式转换位Date类型
+INSERT INTO myemp_huo
+(id,name,salary,job,birth)
+VALUES
+(3,'mike',4000,'MANAGER',TO_DATE('1992-08-02','YYYY-MM-DD')
+)
+
+无法将NULL值插入到非空约束的字段name上
+提示信息：无法将 NULL 插入 ("SYSTEM"."MYEMP_HUO"."NAME")
+INSERT INTO myemp_huo
+(id,salary,job)
+VALUES
+(4,5500,'CLERK')
+
+
+CREATE TABLE userinfo_huo(
+ username VARCHAR2(100),
+  password VARCHAR2(100),
+   nickname VARCHAR2(100),
+)
+
+INSERT INTO userinfo_huo
+(username,password,nickname)
+VALUES
+('fancq','123456','fanfan')
+
+
+2:UPDATE对象，修改表中数据
+需要注意，修改语句通常要添加WHERE子句，这样可以限定要求改的记录。
+若不添加WHERE，则是全表所有记录都进行修改，添加了则只会将满足WHERE条件的记录进行修改
+判断只用一个等于号-----'='
+UPDATE myemp_huo
+SET salary=6000,deptno=20
+WHERE gender='F' OR ...
+
+3:DELETE语句，删除表中数据
+需要注意，删除语句通常要添加WHERE子句，这样可以限定要求删除的记录。
+若不添加WHERE,则是清空表操作，添加了则只会满足WHERE条件的记录进行删除
+DELETE myemp_huo
+WHERE gender='M'
+
+SELECT * FROM myemp_huo
+
+DROP TABLE myemp_huo
+
+-------------------------------------------------------------------------------------
+作业：
+CREATE TABLE emp_huo(
+
+empno NUMBER(4,0),
+ename VARCHAR2(10),
+job VARCHAR2(9),
+mgr NUMBER(4,0),
+hiredate DATE,
+sal NUMBER(7,2),
+comm NUMBER(7,2),
+deptno NUMBER(2,0)
+
+);
+
+CREATE TABLE dept_huo(
+deptno NUMBER(2,0),
+dname VARCHAR2(14 BYTE),
+loc VARCHAR2(13 BYTE)
+);
+
+INSERT  INTO emp_huo
+VALUES
+(7369,'SMITH','CLERK',7902,TO_DATE('1980-12-17','YYYY-MM-DD'),800.00,NULL,20)
+INSERT  INTO emp_huo
+VALUES
+(7499,'ALLEN','SALESMAN',7698,TO_DATE('1981-02-20','YYYY-MM-DD'),1600.00,300.00,30);
+INSERT  INTO emp_huo
+VALUES
+(7521,'WARD','SALESMAN',7698,TO_DATE('1981-02-22','YYYY-MM-DD'),1250.00,500.00,30);
+INSERT  INTO emp_huo
+VALUES
+(7566,'ZHANG','MANAGER',7839,TO_DATE('1981-04-02','YYYY-MM-DD'),2975.00,NULL,20);
+INSERT  INTO emp_huo
+VALUES
+(7654,'LI','SALESMAN',7698,TO_DATE('1981-09-28','YYYY-MM-DD'),1250.00,1400.00,30);
+INSERT  INTO emp_huo
+VALUES
+(7698,'ZHAO','MANAGER',7839,TO_DATE('1981-05-02','YYYY-MM-DD'),2850.00,NULL,30);
+INSERT  INTO emp_huo
+VALUES
+(7782,'QIAN','MANAGER',7839,TO_DATE('1981-06-09','YYYY-MM-DD'),2450.00,NULL,10);
+INSERT  INTO emp_huo
+VALUES
+(7788,'CHEN','ANALYS',7566,TO_DATE('1987-04-19','YYYY-MM-DD'),3000.00,NULL,20);
+INSERT  INTO emp_huo
+VALUES
+(7839,'GAO','PRESIDENT',NULL,TO_DATE('1981-11-17','YYYY-MM-DD'),5000.00,NULL,10);
+INSERT  INTO emp_huo
+VALUES
+(7844,'YAN','SALESMAN',7698,TO_DATE('1981-09-08','YYYY-MM-DD'),1500.00,0.00,30);
+INSERT  INTO emp_huo
+VALUES
+(7876,'SUN','CLERK',7788,TO_DATE('1987-05-23','YYYY-MM-DD'),1100.00,NULL,20);
+INSERT  INTO emp_huo
+VALUES
+(7900,'XUE','CLERK',7698,TO_DATE('1981-12-03','YYYY-MM-DD'),950.00,NULL,30);
+INSERT  INTO emp_huo
+VALUES
+(7902,'TAO','ANALYS',7566,TO_DATE('1981-12-03','YYYY-MM-DD'),3000.00,NULL,20);
+INSERT  INTO emp_huo
+VALUES
+(7934,'MA','CLERK',7782,TO_DATE('1982-01-23','YYYY-MM-DD'),1300.00,NULL,10);
+
+
+
+INSERT  INTO dept_huo
+(deptno,dname,loc)
+VALUES
+(10,'ACCOUNTING','NEW YORK');
+INSERT  INTO dept_huo
+(deptno,dname,loc)
+VALUES
+(20,'RESEARCH','DALLAS');
+INSERT  INTO dept_huo
+(deptno,dname,loc)
+VALUES
+(30,'SALES','CHICAGO');
+INSERT  INTO dept_huo
+(deptno,dname,loc)
+VALUES
+(40,'OPERATIONS','BOSTON');
+
+
+DESC emp_huo
+SELECT * FROM emp_huo
+
+SELECT * FROM dept_huo
+
+COMMIT
+
+SELECT * FROM emp_huo
+
+SELECT * FROM dept_huo
+
+
+----------------------------day02---------------------------
+
+LONG ：VARCHAR2的加长版，可以存储2G字符串数据
+CLOB:建议使用
+
+字符串函数
+
+DQL语句：查询语句
+DQL用于查询表中数据
+DQL必须包含的两部分分为：SELECT子句和FROM子句
+SELECT子句：指定要查询的内容，可以指定表中的具体字段，*号，函数，或者表达式
+FROM子句：指定数据来源的表
+
+SELECT * FROM emp_huo
+SELECT ename,job,sal,deptno FROM emp_huo
+
+查看每个员工的年薪
+SELECT ename,sal,sal*12 FROM emp_huo
+
+SQL中使用WHERE子句可以添加过滤条件：
+来检索只符合过滤条件的记录
+查看20号部门的员工信息，工资大于2000
+SELECT ename,job,sal,deptno 
+FROM emp_huo 
+WHERE sal>2000 AND job='MANAGER'
+
+
+字符串函数：
+1:CONCAT(C1,C2)          --连接c1和c2
+
+SELECT CONCAT(ename,sal) FROM emp_huo 
+SELECT CONCAT(CONCAT(ename,':'),SAL) FROM emp_huo 
+
+
+"||"也可以用来连接多个字符串
+
+
+
+2：LENGTH(char)  --用于返回字符串的长度
+SELECT ename,LENGTH(ename) FROM emp_huo 
+
+
+SELECT ename,sal,job FROM emp_huo WHERE LENGTH(ename)=6
+
+
+3:UPPER、LOWER和NICAP(将首字母变为大写）
+
+将制定字符转换位全大写，全小写，以及首字母大写
+INITCAP中的字符串可以用空格分割多个单词，这样每个单词的首字母都大写
+当查询的数据不与任何表数据有关系时，
+可以查询伪表：dual
+SELECT UPPER('helloworld') FROM dual
+
+SELECT UPPER('helloworld'),
+              LOWER('HELLOWORLD'),
+              INITCAP('hello world')
+
+FROM dual
+
+
+
+SELECT ename,sal,job
+FROM emp_huo
+WHERE ename=UPPER('zhao')
+
+
+3:TRIM LTRIM  RTRIM
+去除字符串两边，单独左边，单独右边的指定重复字符
+
+SELECT TRIM('e' FROM 'eeeeessssaaaseeeeffasgeeee')
+FROM dual
+
+SELECT LTRIM('eeeeessssaaaseeeeffasgeee','e')
+FROM dual
+
+4:LTRIM.RTRIM在删除字符时,只要左面(右面)的每个字符是
+第二参数字符串中有任意一个字符时就去除
+SELECT LTRIM( 'eeedfssedfsaeffagee','edfs')
+FROM dual
+
+5:LPAD,RPAD 
+补位参数
+LPAD(c1,n,c2):将c1显示n位长度，若c1不足n位，则左侧补充若干个c2
+字符，已达到n位长度，若超过，则从左侧开始截取c1位n位长度并返回
+都是从左往右截取
+实用功能：LPAD(SAL,6,'')  左右对齐
+SELECT ename,LPAD(SAL,6,'$')
+FROM emp_huo
+
+SELECT ename,RPAD(SAL,6,'$')
+FROM emp_huo
+
+6：SUBSTR(c,m[,n])            --m为负数为倒着取，长度必须大于0
+截取字符串c，从第m个字符开始，连续截取n个字符
+若n不指定，则是截取到字符串末尾，
+若m超过实际可以截取的字符个数也是截取到字符串末尾、
+数据库中下标都是从1开始的
+
+SELECT 
+SUBSTR('thinking in java',10,2)
+FROM dual
+
+
+7：INSTR(char1,char2[,n[,m]]):
+查找char2在char1中的位置
+n:从第几个字符开始检索，不写默认为1
+m:查找第几次出现，不写默认为1
+
+INSTR ('thinking in java','in',4,3)
+FROM dual
+
+数值类型：NUMBER(p,s)   ----------长度，精度
+
+
+
+数值函数:
+对n 进行四舍五入，保留小数点后m位
+若m不指定则默认为0,0表示保留到整数位
+若m为负数，则是小数点前十位以上数字
+-1表示保留到十位，-2表示百位...
+1:ROUND(n[,m])    ------用于四舍五入，m表示小数点位数()
+
+
+SELECT ROUND(45.4578,2) FROM dual
+SELECT ROUND(45.4578,0) FROM dual
+SELECT ROUND(45.4578,-1) FROM dual
+
+2:TRUNC(n,[,m])
+参数与ROUND意义相同，区别在于仅仅截取数字
+
+3：MOD(m,n)返回m除以n后的余数，n为0直接返回m
+
+求余数，规则为m除以n
+SELECT ename,MOD(sal,1000) FROM emp_huo
+
+4：CEIL(n) FLOOR(n)   天花板（向上取整），地板（向下取整）
+
+SELECT CEIL(45.678) FROM dual
+SELECT FLOOR(45.678) FROM dual
+
+
+日期类型  DATE---->世纪 年月日 时分秒，默认只显示日月年
+TIMESTAMP  最高精度到纳秒
+日期关键字：SYSDATE SYSTIMESTAMP  返回当前系统时间
+看到的是服务器机器上的时间
+他们对应orccal内部的函数，返回一个当前系统时间，
+不同的在于一个返回DATE类型，另一个返回时间戳类型
+
+SELECT SYSDATE FROM dual
+
+
+
+日期转化函数TO_DATE
+1：TO_DATE   将一个字符串按照给定的日期格式解析为一个DATE类型数据
+
+SELECT TO_DATE('2008-08-08 20:08:08','YYYY-MM-DD HH24:MI:ss') FROM dual
+
+
+DATE 类型数据可以计算：
+两个DATE类型之间相减，差为相差的天数
+对一个DATE加减一个数字，等于加减了天数
+日期之间可以比较大小，越晚的越大
+
+查看明天的日期
+
+SELECT SYSDATE+1 FROM dual
+
+查看员工入职天数
+SELECT ename,SYSDATE-hiredate FROM emp_huo
+
+查看自己出生了多少天
+SELECT SYSDATE - TO_DATE('1996-09-20','YYYY-MM-DD') FROM dual
+
+
+在日期格式字符串中出现字母和符号外的其他字符需要使用双引号
+年月日必须只能加上双引号，否则无法识别，单引号识别为字符串
+SELECT TO_DATE('2008年08月08日','YYYY"年"MM"月"DD"日"') FROM dual
+
+
+2：TO_CHAR()
+可以将日期转换位字符串，TO_CHAR函数实际上可以将其他类型转换字符串，
+常用的是将日期转换位字符串
+
+SELECT TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
+FROM dual
+
+
+日期格式中的YY，RR的区别
+RR，YY都是用2位数字表示年
+他们在使用TO_DATE函数将一个字符串中2位数字的年
+解释为实际的年时对世纪的处理方式不同.
+YY是根据当前系统所在世纪来解释世纪的
+RR则根据具体的情况判定
+
+SELECT 
+	TO_CHAR(
+	TO_DATE('96-09-20','YY-MM-DD'),'YYYY-MM-DD')
+
+FROM dual
+
+RR判定表如下：
+user\sys      0-49      50-99
+  0-49       本世纪	   下世纪        
+  50-99 	 上世纪	   本世纪
+
+具体执行如下：
+SELECT 
+	TO_CHAR(
+	TO_DATE('50-09-20','RR-MM-DD'),
+	'YYYY-MM-DD')
+FROM dual
+>>>1950-09-20
+
+SELECT 
+	TO_CHAR(
+	TO_DATE('49-09-20','RR-MM-DD'),
+	'YYYY-MM-DD')
+FROM dual
+>>>2049-09-20
+
+
+
+日期常用函数
+1：LAST_DAY(date) :返回日期所在月的最后一天的日期
+
+
+SELECT LAST_DAY(SYSDATE) FROM dual
+
+查看每个员工入职所在月的月底日期？
+SELECT ename,LAST_DAY(SYSDATE) FROM emp_huo
+
+2:ADD_MONTHS:(date,i)
+对给定日期加指定的月，若i为负数，则是减去指定的月
+
+查看每个员工入职20周年的纪念日？
+SELECT ename,ADD_MONTHS(hiredate,12*20) as "XXX" FROM emp_huo
+
+3：MONTHS_BETWEEN(date1,date2)
+计算两个日期之间所相差的月份，整数月份
+查看每个员工入职至今共多少月了？
+SELECT TRUNC(MONTHS_BETWEEN(SYSDATE,hiredate)) FROM emp_huo
+
+4:NEXT_DAY(date,i)
+返回给定日期第二天开始一周之内的指定周几的日期
+SELECT NEXT_DAY(SYSDATE,5) FROM daul
+
+
+5:GREATEST()、LEAST()   最早、最晚 -------可以传入一个以上的参数
+
+求最小值与最大值，在日期中使用则是求最早的日期与最晚的日期
+SELECT LEAST(SYSDATE,TO_DATE('2008-08-08','YYYY-MM-DD')) FROM dual
+SELECT GREATEST(SYSDATE,TO_DATE('2008-08-08','YYYY-MM-DD')) FROM dual
+
+6:EXTRACT(date FROM datetime)
+提取指定日期对应的时间分量的值
+SELECT  EXTRACT(YEAR FROM SYSDATE) FROM dual
+
+SELECT ename,hiredate FROM emp_huo
+WHERE EXTRACT(YEAR FROM hiredate)=1982
+
+
+
+NULL的含义   空值-- 客观不存在
+
+
+
+CREATE TABLE student_huo
+(id NUMBER(4),name CHAR(20),gender CHAR(1));
+
+INSERT INTO student_huo VALUES(1000,'李莫愁','F');
+
+INSERT INTO student_huo VALUES(1001,'小龙女',NULL);
+
+INSERT INTO student_huo(id,name) VALUES(1002,'谁谁谁');
+
+
+
+SELECT * FROM student_huo
+UPDATE student_huo
+SET gender = NULL
+WHERE id = 1000
+
+
+过滤条件判断NULL值:
+判断NULL要使用IS NULL 或IS NOT NULL
+DELETE FROM student_huo
+WHERE gender IS NULL
+
+
+NULL的运算：
+NULL与字符串连接等于什么也没做
+NULL与数字计算，结果还是NULL
+
+
+SELECT ename||NULL FROM emp_huo
+
+查看每个员工的收入（工资+绩效）
+SELECT ename,sal,comm,sal+comm FROM emp_huo
+
+
+
+空值函数
+NVL(a1,a2)
+当a1为NULL时，函数返回a2的值
+若a1不为NULL，函数返回a1自身
+所以NVL函数的意义是将NULL值替换为非NULL值
+
+
+
+SELECT ename,sal,comm,sal+NVL(comm,0)
+ FROM emp_huo
+
+SELECT ename,sal,comm,NVL2(comm,sal+comm,sal)
+ FROM emp_huo
+
+NVL2(a1,a2,a3)          --可以实现NVL功能
+当a1不为NULL时，函数返回a2
+当a1为NULL时，函数返回a3
+
+查看每个员工的绩效情况，即：
+有绩效的显示"有绩效"，绩效为NULL的则显示"没有绩效"
+
+SELECT ename,sal,comm,NVL2(comm,'有绩效','没有绩效')
+ FROM emp_huo
+
+
+----------------------day03-------------------------------
+
+字段的别名：
+SELECT子句中查询的内容若是函数或者表达式，
+那么在结果集中对应的该字段的名字就是这个函数或者表达式，
+可读性会变得比较差为此可以为这样的字段添加别名，
+这样在结果集中该字段的名字就是这个字段的别名。
+
+别名不区分大小写，若希望区分大小写或者含有空格，那么需要使用
+双引号将别名括起来
+
+
+
+SELECT ename name,sal salary 
+FROM emp_huo
+
+WHERE子句    <   >     <>/!=   不等于使用前者
+
+SELECT ename,sal,hiredate FROM emp_huo
+WHERE deptno<>10
+
+SELECT ename,sal,hiredate FROM emp_huo
+WHERE sal<2000
+
+
+SELECT ename,sal,hiredate FROM emp_huo
+WHERE hiredate>TO_DATE('1982-01-01','YYYY-MM-DD')
+
+
+
+使用AND OR 关键字   配合查询
+可以连接多个条件,但是需要注意的是AND的优先级高于OR的,
+所以可以通过括号提高OR的优先级
+
+SELECT ename,sal,hiredate FROM emp_huo
+WHERE sal>1000 AND job= 'SALESMAN' OR job='CLERK'
+
+SELECT ename,sal,hiredate FROM emp_huo
+WHERE sal>1000 AND (job='CLERK'  OR job= 'SALESMAN')
+
+
+LIKE ------模糊匹配查询字符串  
+两个通配符  
+_:单一的一个字符
+%:任意个字符
+
+查看名字中含有A的员工:         --注意大小写
+SELECT ename,job,sal FROM emp_huo
+WHERE ename LIKE'%A%'
+
+查看第二个字符是A的员工 
+SELECT ename,job,sal FROM emp_huo
+WHERE ename LIKE '_A%'
+
+SELECT ename,job,sal FROM emp_huo
+WHERE ename LIKE '_H%N_'
+
+
+使用IN(LIST) 和  NOT IN(LIST)
+判断在列表中或不在列表中
+IN,NOT IN常用在子查询中
+
+SELECT ename,job FROM emp_huo
+WHERE job IN ('MANAGER','CLERK');
+
+SELECT ename,job FROM emp_huo
+WHERE deptno NOT IN (10,20)
+
+
+
+BETWEEN...AND...      ---相当于大于小于,只要能比较的,先小后大
+ 判断在一个区间范围内
+ 
+SELECT ename,sal FROM emp_huo
+WHERE sal BETWEEN 1500 AND 3000
+
+ANY(LIST)和ALL(LIST)
+ANY,ALL 是配合>,>=,<,<=使用的
+>ANY(LIST):大于列表其中之一(大于最小)
+>ALL(LIST):大于列表所有(大于最大)
+<ANY(LIST):小于列表其中之一(小于最大)
+<ALL(LIST):小于列表所有(小于最小)
+ALL,ANY	通常是用在子查询中,列表不会指定固定值(没意义)
+
+SELECT ename,sal FROM emp_huo
+WHERE sal > ANY(1000,2000,3000)
+
+SELECT ename,sal FROM emp_huo
+WHERE sal > ALL(1000,2000,3000)
+
+
+使用函数/表达式
+SELECT ename,sal,job FROM emp_huo
+WHERE ename = UPPER('rose')
+
+
+SELECT ename,sal,job FROM emp_huo
+WHERE sal *12 >100000
+
+
+
+
+DISTINCT   --过滤
+
+DISTINCT可以对结果集中指定字段的重复记录去除
+
+SELECT DISTINCT job FROM emp_huo
+
+SELECT DISTINCT deptno FROM emp_huo
+
+
+
+
+------------SELECT ename,DISTINCT job FROM emp_huo   ---- 不可以这样
+
+
+
+DISTINCT 可以对多个字段去重,去重不再保证每个字段一定没有重复值,去重的原则是这些
+字段值的组合没有重复记录
+SELECT DISTINCT job,deptno FROM emp_huo
+
+ORDER BY 子句
+ORDER BY 子句是对结果集按照指定的字段的值进行升序或者降序排列的
+
+ORDER BY 支持ASC,DESC
+ASC 为升序,从小到大,不写默认就是升序,一般都不写
+DESC为降序
+需要注意ORDER BY 只能定义在DQLR 的最后一个子句
+
+SELECT ename,job,sal FROM emp_huo
+ORDER BY sal 
+
+SELECT ename,job,sal FROM emp_huo
+ORDER BY sal DESC
+
+ORDER BY 按照多个字段排序时,排序存在优先级
+首先将结果按照第一个字段的排序方式进行排序 
+当第一个字段有重复值的时候,第一个字段值相同的记录之间再按照第二个字段的方式排序
+以此类推.
+
+排序的字段中有NULL值,那么NULL被认定为最大值
+SELECT ename,deptno,sal FROM emp_huo
+ORDER BY deptno DESC,sal DESC
+
+
+
+SELECT ename,deptno,sal FROM emp_huo
+WHERE deptno=(20) 
+ORDER BY sal DESC            --放在最后 
+
+聚合函数 又称为: 分组函数  多行函数 
+是用来对结果集进行统计的
+其中有4个针对值的统计:MAX MIN AVG SUM
+还有一个是针对记录数的统计:COUNT
+
+查看公司的最高工资
+SELECT MAX(sal),MIN(sal),SUM(sal),ROUND(AVG(sal)) FROM emp_huo
+
+COUNT 是统计指定字段不为NULL的记录共多少条?
+查看公司员工人数?
+SELECT COUNT(ename) FROM emp_huo
+常见的统计表中记录数的写法
+SELECT COUNT(*) FROM emp_huo
+SELECT COUNT(1) FROM emp_huo   --SELECT 1 FROM emp_huo  1为常量值
+
+聚合函数忽略NULL值
+SELECT SUM(comm),AVG(comm) FROM emp_huo
+
+
+SELECT AVG(NVL(comm,0)) FROM emp_huo   --- 对全部值进行统计
+
+
+
+
+GROUP BY子句
+可以将结果集按照指定的字段值一样的记录进行分组,
+配合聚合函数可以进行组内统计的工作
+
+查看每个部门的平均工资?
+SELECT AVG(sal),deptno
+FROM emp_huo
+GROUP BY deptno
+
+--报错: 不是单组分组函数,注意字段数量
+--SELECT AVG(sal),deptno
+--FROM emp_huo
+
+每个职位最高工资?
+SELECT MAX(sal),job
+FROM emp_huo
+GROUP BY job
+
+当中含有聚合函数时,凡不在聚合函数中的单独字段,都需要出现在GROUP BY子句中
+GROUP BY 按照多个字段分组的原则:这些字段值都一样的记录被划分为一组
+
+查看同部门同职位的员工各多少人
+
+SELECT COUNT(*),deptno,job
+FROM emp_huo
+GROUP BY deptno,job
+
+
+查看每个部门的平均工资,前提是该部门的工资高于2000
+
+
+---------------------
+SELECT AVG(sal),deptno
+FROM emp_huo
+WHERE AVG(sal)>2000          --过滤时机
+GROUP BY deptno
+以上报错-----------
+
+SELECT ROUND(AVG(sal)),deptno
+FROM emp_huo
+GROUP BY deptno HAVING AVG(sal)>2000
+
+
+WHERE不能使用聚合函数作为过滤条件,原因是过滤时机不对
+WHERE是在查询表中数据的时候逐行进行过滤,将满足条件的记录形成结果集
+而使用聚合函数的结果进行过滤的前提是分组统计,分组是建立再结果集上的,
+而WHERE是用来形成结果集时的过滤,
+所以使用聚合函数过滤时应当是在WHERE之后进行的
+HAVING子句，HAVING子句可以使用聚合函数作为过滤条件,
+HAVING必须跟在GROUP BY后面,(不定义GROUP BY不能单独定义HAVING)
+HAVING是用来 添加过滤条件以去除不满足条件的分组的.
+
+HAVING 消耗资源
+查看平均工资高于2000的那些部门的最高工资是多少
+
+SELECT MAX(sal),deptno
+FROM emp_huo
+GROUP BY deptno HAVING AVG(sal)>2000
+
+SQL (关联查询)
+
+
+关联查询是指关联多张表联合查询记录,结果集中的字段可能来自多张表
+关联查询的关键点在于连接条件,数据库是根据连接条件找到这些表中记录
+之间的对应关系,从而从这些记录中获取要查询的字段来构成结果集中的各个字段
+
+
+查看每个员工的名字以及其所在部门的名字
+SELECT ename,dname
+FROM emp_huo,dept_huo
+WHERE  emp_huo.deptno = dept_huo.deptno
+
+--注意相同字段名的表   
+SELECT ename,emp_huo.deptno,dname
+FROM emp_huo,dept_huo
+WHERE  emp_huo.deptno = dept_huo.deptno
+
+当某个字段在查新中发现多个表存在是，要求必须指明该字段所属哪张表，
+可以为表名添加别名:表别名.字段名 的形式标注 
+这样可以降低编写SQL语句的复杂度，增加可读性
+
+SELECT e.ename,e.deptno,d.dname
+FROM emp_huo e,dept_huo d
+WHERE  e.deptno = d.deptno
+
+
+关联查询中要求所有的过滤条件必须和关联条件同时满足  AND
+
+查看在NEW YORK 工作的员工
+SELECT e.ename,e.deptno,d.dname,d.loc
+FROM emp_huo e,dept_huo d
+WHERE  e.deptno = d.deptno
+AND d.loc='NEW YORK'
+
+
+查看职位是MANAGER的员工在哪个城市工作
+
+SELECT e.ename,e.job,d.dname,d.loc
+FROM emp_huo e,dept_huo d
+WHERE  e.deptno = d.deptno                --三张表至少写两个条件
+AND e.job='MANAGER'
+
+N张表关联查询，至少要有N-1个连接条件
+不指定连接条件或者连接条件无效时，会产生一个笛卡尔积，这同常是
+一个无意义的结果集，应当避免
+如：
+笛卡尔积：两个学校的每个班级都要互相踢足球比赛(使用情况较少)
+SELECT e.ename,d.dname
+FROM emp_huo e,dept_huo d
+
+
+
+
+内连接   内连接也是关联查询的一种
+查看每个员工以及所在部门信息
+SELECT e.ename,d.dname
+FROM emp_huo e,dept_huo d
+WHERE e.deptno = d.deptno
+AND d.loc = 'NEW YORK'
+
+SELECT e.ename,d.dname
+FROM emp_huo e JOIN dept_huo d      --条理更加清晰，用的数据库标准不一样
+ON e.deptno = d.deptno
+JOIN XXX x
+ON d.xx=x.xx
+WHERE d.loc = 'NEW YORK'
+
+关联查询中，不满足连接条件的记录不会被查询出来  --比如...
+
+
+外连接           --不满足连接条件的记录也可以查询出来
+外连接在进行关联查询的时候，除了可以将满足连接条件的记录
+查询出来之外，还可以将不满足连接条件的记录也查询出来
+外连接分为：左外连接，右外连接，全外连接
+左外连接：以JOIN左侧表作为驱动表，该表中的所有记录都会查询出来
+当某条记录不满足连接条件时，结果集中该条记录中来自JOIN右侧表的字段的值
+全部为NULL
+右外连接：以JOIN右侧表作为驱动表，该表中的所有记录都会查询出来
+当某条记录不满足连接条件时，结果集中该条记录中来自JOIN左侧表的字段的值
+全部为NULL
+全外连接：以JOIN两侧表作为驱动表，该表中的所有记录都会查询出来
+当某条记录不满足连接条件时，结果集中该条记录中来自JOIN两侧表的字段的值
+全部为NULL
+
+SELECT e.ename,e.sal,e.deptno,d.dname,d.loc
+FROM emp_huo e LEFT OUTER JOIN dept_huo d
+ON  e.deptno = d.deptno
+
+SELECT e.ename,e.sal,e.deptno,d.dname,d.loc
+FROM emp_huo e RIGHT OUTER JOIN dept_huo d
+ON  e.deptno = d.deptno
+
+SELECT e.ename,e.sal,e.deptno,d.dname,d.loc
+FROM emp_huo e FULL OUTER JOIN dept_huo d
+ON  e.deptno = d.deptno
+
+
+自连接                --表内一对多关系
+多级、父子、树状  --减少表的数量
+
+当前表的一条记录可以对应当前表自己的多条记录
+自连接的设计是为了解决数据属性相同，
+但是数据间有存在上下级关系的树状结构数据时使用
+
+查看每个员工以及其上司的名字
+
+SELECT e.ename,m.ename
+FROM emp_huo e,emp_huo m
+WHERE e.mgr=m.empno
+
+SELECT e.ename,m.ename
+FROM emp_huo e JOIN emp_huo m
+ON e.mgr=m.empno
+
+SELECT e.ename,m.ename
+FROM emp_huo e LEFT OUTER JOIN emp_huo m
+ON e.mgr=m.empno
+
+
+----------------------day04-----------------------
+
+
+子查询
+
+子查询是一条查询语句，它是嵌套在其他SQL语句当中的，
+目的是为外层的SQL语句提供数据
+子查询在DDL,DML,DQL中都可以使用
+
+
+查看谁的工资高于zhao
+
+SELECT ename,sal
+FROM emp_huo
+WHERE sal>(SELECT sal FROM emp_huo
+			WHERE ename='ZHAO')
+
+
+
+查看那些员工的工资是高于公司的平均工资
+
+ SELECT ename,sal
+FROM emp_huo
+WHERE sal>(SELECT AVG(sal) FROM emp_huo)
+
+
+DDL中使用子查询，可以将一个子查询的结果集当做一张表快速创建出来
+CREATE TABLE employee_huo
+AS
+SELECT e.empno,e.ename,e.sal,e.job,e.deptno,d.dname,d.loc
+FROM emp_huo e LEFT OUTER JOIN dept_huo d
+ON e.deptno = d.deptno
+
+
+
+将ZHAO 所在部门的员工工资上浮10%
+UPDATE emp_huo
+SET sal = sal * 1.1
+WHERE deptno = (SELECT deptno FROM emp_huo
+				WHERE ename='ZHAO')
+
+				
+子查询根据结果分为：
+单行单列子查询，多行单列子查询，多行多列子查询
+其中单列子查询常用在过滤条件中，而多列子查询当做表使用
+
+对于多行单列子查询，在进行过滤判断是要配合IN,ANY,ALL使用
+
+			
+				
+SELECT ename,deptno 
+FROM emp_huo
+WHERE deptno=(	
+	SELECT  deptno
+	FROM emp_huo
+	WHERE job='SALESMAN')	
+				
+				
+查看比职位是CLIRK和SALEMAN工资都高的员工				
+SELECT ename,sal
+FROM emp_huo
+WHERE sal> ALL(	
+				SELECT  sal
+				FROM emp_huo
+				WHERE job='SALESMAN'  OR job='CLERK')	  		
+				
+				
+				
+EXISTS关键字
+用在过滤条件中，其后跟着一个子查询，只要该子查询可以查询出一条记录，
+那么EXISTS就认为满足条件
+
+查看有员工的部门信息
+SELECT deptno,dname
+FROM dept d
+WHERE EXISTS(
+			SELECT * FROM emp_huo e
+			WHERE d.deptno=e.deptno)				
+				
+查看谁是别人的上司				
+							
+				
+SELECT e.ename,e.empno
+FROM emp_huo e
+WHERE EXISTS(
+			SELECT * FROM emp_huo m
+			WHERE e.mgr=m.empno)					
+				
+
+
+查看部门的最低工资？前提是该部门的最低工资高于30号部门的最低工资
+SELECT MIN(sal).deptno 
+FROM emp_huo
+GROUP BY deptno
+HAVING MIN(sal)>(SELECT MIN(sal)
+				FROM emp_huo
+				WHERE deptno=30)
+
+子查询在FROM中使用
+
+
+查看那些员工的工资是高于部门的平均工资
+
+     
+SELECT e.ename,e.sal,e.deptno
+FROM emp_huo e,(SELECT avg(sal) avg_sal,deptno FROM emp_huo e
+			GROUP BY  deptno) t
+WHERE e.deptno=t.deptno
+AND e.sal > t.avg_sal     
+
+
+
+查看每个部门最高工资是谁
+
+   SELECT e.ename,e.job,e.sal,e.deptno
+FROM emp_huo e,(SELECT MAX(sal) max_sal,deptno FROM emp_huo e
+			GROUP BY  deptno) t
+WHERE e.deptno=t.deptno
+AND e.sal = t.max_sal   
+
+
+
+子查询在select中
+
+ select e.ename,e.sal,(select d.dname from dept_huo d
+ where d.deptno=e.deptno) dname
+ from emp_huo e
+ 
+ 分页查询
+就是将一个查询语查询的数据分批分段查询出来
+这样做的好处在于，当一个查询语句可以查询的结果非常大时
+有效的减少网络传输的数据量，提高响应速度，降低系统开销
+
+
+ROWNUM 伪列
+是一个伪列，实际不存在任何表中，但是每张表都可以查询该字段
+该字段的值为查询结果集中每条记录的行号
+该字段的值是伴随查询的过程中动态生成的，只要可以从表中查询出一条记录
+那么该字段的值就是该记录在当前结果集中的行号，行号从1开始递增
+
+
+
+在使用ROWNUM字段为结果集编行号的过程中，不要使用ROWNUM做>1以上的
+数字的判断为过滤条件，否则将得不到任何结果
+
+
+select rownum,ename,sal,job,deptno
+from emp_huo
+where rownum > 1
+
+select rownum,ename,sal,job,deptno
+from emp_huo
+where rownum BETWEEN 6 AND 10
+
+上面的得不到结果
+
+
+select *
+from
+(select rownum rn,ename,sal,job,deptno
+from emp_huo)
+where rn BETWEEN 6 AND 10
+注意使用别名
+
+
+
+查看公司工资排名的6-10名     --不好
+
+select *
+from
+(select rownum rn,ename,sal,job,deptno
+from emp_huo
+ORDER BY sal DESC
+)
+where rn between 6 and 10
+
+下面的更好，行号也按照顺序进行排序
+SELECT *
+FROM(SELECT ROWNUM rn, t.*
+    FROM(SELECT ename,sal,JOB,deptno
+      FROM emp_huo
+      ORDER BY sal DESC)t
+)
+WHERE rn BETWEEN 6 AND 10
+
+下面的最好，查询资源数量减少，更加合理
+SELECT *
+FROM(SELECT ROWNUM rn, t.*
+    FROM(SELECT ename,sal,JOB,deptno
+      FROM emp_huo
+      ORDER BY sal DESC)t
+      WHERE ROWNUM <= 10)
+WHERE rn >= 6
+
+
+查询案例：
+分页查询：显示的方法：
+PageSize：每页显示的条目数
+Page：	  要显示的页数
+start:(Page-1)*PageSize + 1
+end:Page*PageSize 
+
+
+
+
+
+DECODE函数
+DECODE()       对特定字段进行替换，类似case
+
+
+SELECT ename,job,sal,
+	DECODE(job,
+	'MANAGER',sal*1.2,
+	'ANALYST',sal*1.1,
+	'SALESMAN',sal*1.05,
+	sal)bonus
+  FROM emp_huo
+
+注意每行结尾的逗号
+
+
+统计公司人数，所有ANALYST与	MANAGER看做一组，
+其他的职位员工看做一组，统计人数
+
+SELECT COUNT(1),DECODE(job,
+'MANAGER','VIP',
+'ANALYST','VIP',
+'OTHER')
+FROM emp_huo
+GROUP BY DECODE(job,
+'MANAGER','VIP',
+'ANALYST','VIP',
+'OTHER')
+
+CASE 语句，实现类似if-else 操作，和DECODE函数功能相似
+
+SELECT ename,job,sal,
+CASE JOB WHEN 'MANAGER' THEN sal*1.2
+               WHEN 'ANALYST' THEN sal*1.1
+              	WHEN 'SALESMAN' THEN sal*1.05
+               ELSE sal END 
+  bonus
+FROM emp_huo
+
+使用DECODE进行排序
+SELECT deptno,dname,loc
+FROM dept_huo
+ORDER BY 
+	DECODE(dname,'OPERATIONS',1,'ACCOUNTING',2,'SALES',3)
+
+
+排序函数
+可以将结果集按照指定的字段分组，
+组内在按照指定的字段排序，然后生成组内编号
+ROW_NUMBER：生成组内连续且唯一的数字
+
+
+查看每个部门的工资排名
+
+SELECT ename,deptno,sal,
+		ROW_NUMBER()  OVER(
+		PARTITION BY deptno
+			ORDER BY sal DESC
+			)rank
+FROM emp_huo
+
+查看每个部门的工资排名(当组内出现工资一样的情况时适用)
+RANK生成组内不连续且不唯一的数字
+SELECT ename,deptno,sal,
+		RANK()  OVER(
+		PARTITION BY deptno
+			ORDER BY sal DESC
+			)rank
+FROM emp_huo
+
+
+查看每个部门的工资排名(当组内出现工资一样的情况时适用,与上面的有所不同)
+DENSE_RANK生成组内不连续但不唯一的数字
+SELECT ename,deptno,sal,
+		DENSE_RANK()  OVER(
+		PARTITION BY deptno
+			ORDER BY sal DESC
+			)rank
+FROM emp_huo
+
+高级搜索函数
+
+CREATE TABLE sales_tab(
+	year_id NUMBER NOT NULL,
+	month_id NUMBER NOT NULL,
+	day_id NUMBER NOT NULL,
+	sales_value NUMBER(10,2) NOT NULL
+	);
+	
+	
+INSERT INTO sales_tab
+SELECT TRUNC(DBMS_RANDOM.value(2010,2012)) AS year_id,
+		TRUNC(DBMS_RANDOM.value(1,13)) AS month_id,
+		TRUNC(DBMS_RANDOM.value(1,32)) AS day_id,
+		TRUNC(DBMS_RANDOM.value(1,100)) AS sales_value
+FROM dual
+CONNECT BY level<=1000;
+COMMIT;
+		
+
+集合操作  交集、并集、差集
+
+合并职位是：'MANAGER'的员工和薪水大于2500的员工集合，
+查看两种方式的结果差别
+
+并集
+SELECT ename,job,sal from emp_huo
+WHERE job='MANAGER'
+UNION
+SELECT ename,job,sal  FROM emp_huo
+where sal>2500; 	
+
+SELECT ename,job,sal  FROM emp_huo
+WHERE job='MANAGER'
+UNION ALL
+SELECT ename,job,sal  FROM emp_huo
+where sal>2500; 
+
+交集
+SELECT ename,job,sal  FROM emp_huo
+WHERE job='MANAGER'
+INTERSECT
+SELECT ename,job,sal  FROM emp_huo
+where sal>2500; 
+
+
+差集
+SELECT ename,job,sal  FROM emp_huo
+WHERE job='MANAGER'
+MINUS
+SELECT ename,job,sal  FROM emp_huo
+where sal>=2500; 
+
+
+高级分组函数
+ROLLUP CUBE 
+
+
+查看每天营业额
+SELECT year_id,month_id,day_id,sales_value
+FROM sales_tab
+ORDER BY  year_id,month_id,day_id
+
+查看每天每月每年以及总共的营业额： 
+SELECT year_id,month_id,day_id,SUM(sales_value)
+FROM sales_tab
+GROUP BY year_id,month_id,day_id
+UNION ALL
+SELECT year_id,month_id,NULL,SUM(sales_value)
+FROM sales_tab
+GROUP BY year_id,month_id
+UNION ALL
+SELECT year_id,NULL,NULL,SUM(sales_value)
+FROM sales_tab
+GROUP BY year_id
+UNION ALL
+SELECT NULL,NULL,NULL,SUM(sales_value)
+FROM sales_tab
+
+
+1:ROLLUP函数
+GROUP BY ROLLUP(a,b,c)
+等价于
+GROUP BY a,b,c
+UNION ALL
+GROUP BY a,b
+UNION ALL
+GROUP BY a
+UNION ALL
+全表
+
+SELECT year_id,month_id,day_id,SUM(sales_value)
+FROM sales_tab
+GROUP BY ROLLUP (year_id,month_id,day_id)
+ORDER BY year_id,month_id,day_id
+
+1：CUBE 函数
+GROUP BY CUBE(a,b,c)
+
+2:CUBE :参数的每种组合都进行一次分组，数据更加全面，但是可能没意义
+
+GROUPING SETS:可以自定义分组方式，每个参数为一种分组方式，
+然后将这些分组统计的结果并在一个结果集中显示
+				
+查看每天与每月的营业额	
+
+SELECT year_id,month_id,day_id,SUM(sales_value)
+FROM sales_tab
+GROUP  BY GROUPING SETS(
+(year_id,month_id,day_id),(year_id,month_id)
+
+)
+ORDER BY year_id,month_id,day_id
+
+
+
+--------------------------------day5-------------------------------
+
+视图: 虚表  虚拟的表(对象,不能重复)           --内视图
+是数据库对象之一
+视图在SQL语句中体现的角色与表一致,但它不是一张真实存在的表
+只是对应了一个查询语句的结果
+
+创建视图:
+create view 权限不足,需要管理员给用户添加权限
+
+CREATE VIEW v_emp_10_huo
+AS 
+SELECT empno,ename,sal,deptnp
+FROM emp_huo
+WHERE deptno = 10;
+
+
+查看视图的结构
+DESC v_emp_10_huo
+
+查看视图数据
+SELECT * FROM v_emp_10_huo       --相当于显示子查询数据
+删除视图
+DROP VIEW v_emp_10_huo
+
+分类:简单视图,复杂视图,连接视图      (根据对应的子查询结果集)
+简单视图:对应的子查询不含有函数,表达式,去重,分组函数
+复杂视图:不是简单视图的都是复杂视图
+连接视图:对应的子查询有多表关联查询,连接视图算作复杂视图
+
+简单视图可以进行DML操作,但是复杂视图不允许进行DML操作
+目的:简化,限制访问
+
+创建视图,给列添加别名
+当视图对应的子查询中含有函数或者表达式,那么必须指定别名(重要)
+复杂视图:
+修改视图:视图的结构取决于对应的子查询,所以修改视图就是替换对应的子查询
+CREATE OR REPLACE VIEW v_emp_10_huo
+AS 
+SELECT empno id,ename name,sal,deptno
+FROM emp_huo
+WHERE deptno = 10                --这里是10
+
+
+对视图进行DML操作就是对视图数据来源的基础表进行的操作
+虽然可以对简单视图进行DML操作,但是DML操作也不能违反基表的约束
+如:基表的字段要求非空
+受事务控制
+
+插入表操作:
+INSERT INTO v_emp_10_huo
+(id,name,sal,deptno)
+VALUES
+(1001,'JACK',2000,10)
+
+更新表操作:
+UPDATE v_emp_10_huo
+SET sal = 3000
+WHERE id = 1001
+
+
+删除表操作:
+DELETE v_emp_10_huo
+WHERE id = 1001
+
+
+是简单视图的不当DML操作会污染基础表数据:
+对简单视图进行DML操作后,视图对基础表做对应操作,但是影响
+的数据视图对其不可见时,就是对基表的数据污染
+
+如: INSERT 和 UPDATE
+INSERT INTO v_emp_10_huo
+(id,name,sal,deptno)
+VALUES
+(1001,'JACK',2000,20)       --注意最后的20
+
+---这样插入的数据在视图中不可见,这样就无法操作了,但在基表中可见
+
+删除不会产生数据污染
+
+为视图添加检查选项可以避免对基础表产生的数据污染
+检查选项要求对视图进行的DML操作后该记录视图对其可见,
+否则可能会修改失败不允许
+
+WITH CHECK OPTION         --提示:视图 WITH CHECK OPTIDN where 子句违规
+
+CREATE OR REPLACE VIEW v_emp_10_huo
+AS 
+SELECT empno id,ename name,sal,deptno
+FROM emp_huo
+where deptno = 10
+WITH CHECK OPTION
+
+对视图添加只读选项后,该视图不允许进行DML操作
+
+CREATE OR REPLACE VIEW v_emp_10_huo
+AS 
+SELECT empno id,ename name,sal,deptno
+FROM emp_huo
+where deptno = 10
+WITH READ ONLY
+
+
+
+数据字典:
+数据字典是一系列的表,这些表的数据由数据库自行维护,
+记录的是一些清单信息,方便随时查看
+
+	USER_OBJECTS :记录用户创建的所有数据库对象 
+	USER_VIEWS   :记录用户创建的所有视图	
+	USER_TABLES  :记录用户创建的所有的表
+
+数据库:
+SELECT * FROM user_objects
+
+SELECT object_name
+FROM user_objects
+WHERE object_type = 'VIEW'       --注意大小写
+AND object_name LIKE '%HUO'      --查找自己创建的表,大写
+
+视图:
+SELECT * FROM user_views
+
+SELECT view_name,text
+FROM user_views
+WHERE view_name LIKE '%HUO'
+
+表:
+SELECT * FROM user_tables
+
+
+我未成年~
+
+创建一个含有各个部门工资情况的视图
+CREATE VIEW v_emp_dept_sal 
+AS 
+SELECT MAX(e.sal) max_sal,
+		MIN(e.sal) min_sal,
+		AVG(e.sal) avg_sal,
+		SUM(e.sal) sum_sal,
+		d.deptno,d.dname
+FROM emp_huo e JOIN dept_huo d
+ON e.deptno = d.deptno
+GROUP BY d.deptno,d.dname		
+
+高于自己所在部门的平均工资的员工
+
+
+SELECT e.ename,e.sal,e.deptno
+FROM emp_huo e JOIN v_emp_dept_sal v
+ON e.deptno = v.deptno
+WHERE e.sal > v.avg_sal
+
+
+序列
+也是数据库对象之一,序列的作用是根据指定的规则生成一系列数字
+序列通常是为某张表的主键字段提供值使用
+主键:通常每张表都会有主键字段,该字段的值要求非空且唯一,
+使用该字段来确定表中的每一条记录使用
+
+
+创建序列:
+CREATE SEQUENCE seq_emp_id_huo
+START WITH 1
+INCREMENT BY 1
+
+
+序列提供两个伪列:
+NEXTVAL:获取序列的下一个数字,第一次获取时返回的是START WITH 指定
+的数字,以后则是最后获取的数字加上步长得到的
+NEXTVAL会导致序列发生步进,且不可回退
+
+CURRVAL:获取序列当前数字,即:最后一次生成的数字,新创建的序列需要至少
+调用一次NEXTVAL以后才可以使用,CURRVAL不会发生序列的步进
+
+
+SELECT seq_emp_id_huo.NEXTVAL
+FROM dual
+
+SELECT seq_emp_id_huo.CURRVAL
+FROM dual
+
+
+INSERT INTO emp_huo(empno,ename,sal,job,deptno)
+VALUES (seq_emp_id_huo.NEXTVAL,'jack',3000,'CLEAR',10)
+
+--
+
+SELECT * FROM emp_huo       
+--使用回退看看,不受事务控制,序列拿走就是拿走
+
+--产生断裂,用在两张表   缓存-->  服务器断电情况
+
+数据持久化
+
+删除序列:
+DROP SEQUENCE seq_emp_id_huo
+
+
+
+索引
+是数据库对象之一,作用是加快查询效率
+索引的创建与使用是数据库自行完成的
+经常出现在WHERE中的字段,或者去重,排序,关联条件的字段可以添加索引
+
+创建索引
+CREATE INDEX idx_emp_ename ON emp_huo(ename);
+
+
+复合索引:
+CREATE INDEX idx_emp_job_sal ON emp_huo(job,sal);
+
+创建基于函数的索引
+CREATE INDEX emp_ename_upper_idx ON emp_huo(UPPER(ename));
+
+
+修改和删除索引
+重建索引:
+ALTER INDEX idx_emp_ename REBUILD;
+
+
+删除一个索引:
+DROP INDEX idx_emp_ename;
+
+
+
+--小表不建索引
+
+
+
+
+约束:
+约束的条件(5个):
+非空
+唯一
+主键
+外键
+检查
+
+
+建表时添加非空约束      
+
+CREATE TABLE employee_h(
+	eid NUMBER(6),
+	name VARCHAR2(30) NOT NULL,
+	salary NUMBER(7,2),
+	hiredate DATE CONSTRAINT employee_hiredate_nn NOT NULL
+
+)
+
+修改表时添加非空约束
+
+ALTER TABLE employee_h
+MODIFY(eid NUMBER(6) NOT NULL);
+
+
+ALTER TABLE employee_h
+MODIFY(eid NUMBER(6) NULL);          --取消非空约束
+
+
+唯一性约束:
+要求该字段在整张表中每条记录的值都不允许重复,NULL除外
+CREATE TABLE employee1(
+	eid NUMBER(6) UNIQUE,
+	NAME VARCHAR2(30),
+	email VARCHAR2(50),
+	salary NUMBER(7,2),
+	hiredate DATE,
+	CONSTRAINT employee_email_uk UNIQUE(email)
+)
+
+
+
+
+INSERT INTO employee1
+(eid,name,email)
+VALUES
+(NULL,'JACKE',NULL)
+
+
+
+
+在建表后添加唯一性约束条件:
+ALTER TABLE employee1
+ADD CONSTRAINT employee1_name_uk UNIQUE(name);
+
+
+
+
+主键约束:
+要求字段非空且唯一，且一张表只能有一个主键约束
+相当于NOT NULL且UNIQUE
+永远不要更新主键,唯一标志外无它用
+
+添加主键约束
+CREATE TABLE employee2(
+	eid NUMBER(6) PRIMARY KEY,
+	name VARCHAR2(30),
+	email VARCHAR2(50),
+	salary NUMBER(7,2),
+	hiredate DATE
+);
+
+INSERT INTO employee2
+(eid,name)
+VALUES
+(1,'JACKE')
+
+--重复插入会提示：违反唯一约束条件 (SYSTEM.SYS_C004039)
+
+添加主键约束:
+  ---
+  
+外键约束:
+  了解
+必须是主键里有的,或者NULL
+对性能降低厉害,删除难
+
+检查约束:  
+ 
+ALTER TABLE employee2
+ADD CONSTRAINT employee2_salary_check
+CHECK (salary >2000)
+
+正常插入数据:
+INSERT INTO employee2(eid,name,salary,deptno)
+VALUES (1236,'DAADS',2500,40);
+
+试图修改数据:
+UPDATE employee2
+SET salary = 1500
+WHERE eid = 1236;
+错误提示:   --违反检查约束条件 (SYSTEM.EMPLOYEE2_SALARY_CHECK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
+				
+

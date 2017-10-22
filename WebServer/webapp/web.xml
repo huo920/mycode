@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- conf/web.xml -->
+<webapp>
+	<url-mapping>
+		<url>/reg</url>
+		<class>demo.RegServlet</class>
+	</url-mapping>
+	<url-mapping>
+		<url>/login</url>
+		<class>demo.LoginServlet</class>
+	</url-mapping>
+
+</webapp>

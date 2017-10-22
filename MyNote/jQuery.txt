@@ -1,0 +1,145 @@
+jQuery
+	jQuery选择器:$(DOM对象)
+	通过jQuery选择器选中的对象为jQuery对象
+	jQuery对象本质上就是DOM数组
+	
+	jQuery对象可以调用jQuery方法
+		遍历jQuery对象可以得到DOM对象
+		
+	DOM对象可以调用DOM对象
+		
+		
+	不同对象调用不同方法
+	
+	
+	jQuery选择器:
+		基本选择器:
+			元素选择器:
+			类选择器:
+			id选择器:
+			选择器组：
+		层次选择器:
+			子孙:
+			子:
+			下一个弟弟:$("#gz+")
+			所有弟弟:$("#gz+")
+		过滤选择器:
+			1.基本过滤选择器
+			2.内容过滤选择器
+			3.可见性过滤选择器
+			4.属性过滤选择器
+				p[id]:所有有id属性的p
+			5.状态过滤选择器
+				enable disable checked(单选和多选) selected(下拉选)
+		表单选择器:
+			:text  :password  :radio  :checkbox  :submit
+			:reset  :button  :file  :hidden
+		
+	js中用法:
+		读写:
+			nodeName,nodeType
+			innerHTML,innerText
+			value
+			getAttribute()
+		查询:
+			id
+			TagName
+			name
+			父
+			孩子
+		增删:
+			createElement()
+			appendChild()
+			insertBefore()
+			removeChild()
+			
+		
+		样式操作:
+	
+		遍历节点:
+		
+		
+		jQuery中遇到的对象
+			1.通过$获得的都是jQuery对象
+				$("p")
+				$(p)
+				$("<p></p>")
+			2.修改方法返回的是jQuery对象
+				obj.html("abc")
+				obj.attr("src","../images/02.jpg")
+				
+			3.查询方法
+				1.若查到元素则返回jQuery对象
+					obj.parent()
+					obj.prev()
+				2.若查到文本则返回字符串(DOM对象)
+					obj.html()
+					obj.val()
+			4.万能的判断方式
+				控制台输出
+		
+		
+	jQuery事件:
+		1.事件概述:
+			1.什么是事件
+				和js事件一样
+			2.事件的分类
+				和js事件一样
+		2.事件的分类
+			1.直接定义事件
+				和js事件一样
+			2.动态绑定事件
+				$(":button:first").click(function() {
+					console.log(1);
+				});
+			3.如何取消
+				和js事件一样
+		3.事件对象
+			1.什么是事件对象
+				和js事件一样
+			2.如何获取事件对象
+				和js事件一样
+				jQuery对事件对象作出了一些改造
+		4.事件机制
+			1.冒泡机制
+				和js事件一样
+			2.取消冒泡
+				e.stopPropagation()
+			3.作用
+				和js事件一样
+			4.事件源
+				e.target
+			5.合成事件
+				hover
+				toggle
+			6.模拟事件(*)
+				obj.trigger("click")
+			
+	jQuery动画
+		显示和隐藏的动画效果
+			show()/hide()
+		
+		自定义动画
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		

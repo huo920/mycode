@@ -1,0 +1,558 @@
+
+服务器端编程:
+	servlet/jsp
+	
+1.什么是Servlet?
+	sun公司制定的一种用来扩展web服务器的组件规范
+		1.用来扩展web服务器功能
+			早期web服务器apache http server,iis
+			早期用CGI来扩展,CGI通用网关接口
+			
+			容器：将网络相关的问题都处理了,我们只需要在servlet类当中,编写业务逻辑相关的代码
+			
+		2.组件规范
+			1.什么是组件?
+				符合规范,实现部分功能的,并且需要部署到容器里面才能运行的软件模块
+				servlet就是一个组件,需要部署到servlet容器里面才能运行
+			2.什么是容器?
+				符合规范,为组件提供运行环境的程序
+				比如Tomcat(雄猫)就是一个Servlet容器.
+				IBM的websphere
+				
+		1.写一个java类,实现Servlet接口或者继承HTTPServlet类		
+		2.编译
+		3.打包
+		4.部署
+		5.启动容器,访问Servlet
+			http://ip:port/appname/url-pattern
+			注:url-pattern在web.xml中设置
+			
+3.Servlet是如何运行的?
+	比如:在浏览器地址栏输入 http://ip:port/appname/hello
+	1.浏览器根据ip和port建立与服务器之间的连接
+	2.浏览器会将请求数据打包(即按照http的要求制作请求数据包),然后将该数据包发送给服务器
+	3.服务器拆包(即按照http协议将请求数据包中的数据解析出来),并将解析到的数据添加到request对象上,同时,创建一个response对象
+	4.服务器创建一个servlet实例,然后调用器service方法
+		注:服务器会将request对象和response对象作为参数传进来,可以通过request对象获取请求相关的数据(比如:获得请求参数值),
+			然后将处理结果写到response对象上
+	5.服务器将response对象上的数据取出来,打包(即按照http协议要求制作相应数据包),然后将数据发送给浏览器
+	6.浏览器拆包,生成相应的页面
+	
+	
+	
+	1.建立连接
+	2.浏览器打包
+	3.浏览器发送请求
+	4.服务器拆包
+	5.服务器创建请求和响应对象
+	6.服务器创建一个Servlet对象
+	7.Servlet对象调用server方法,参数为请求对象和响应对象
+ (*)8.servlet对象从请求对象处获得数据进行处理后写入给响应对象
+	9.服务器从响应对象中读出数据
+	10.服务器打包
+	11.服务器发送响应
+	12.浏览器拆包
+	13.浏览器将页面显示给用户
+	
+	
+4.常见的错误
+	状态码:表示服务器处理请求的一种状态
+	Status-Code   = "200"   ; OK
+				  | "201"   ; Created
+				  | "202"   ; Accepted
+				  | "204"   ; No Content
+				  | "301"   ; Moved Permanently
+				  | "302"   ; Moved Temporarily
+				  | "304"   ; Not Modified
+				  | "400"   ; Bad Request
+				  | "401"   ; Unauthorized
+				  | "403"   ; Forbidden
+				  | "404"   ; Not Found                   应用部署失败;请求路径错误
+				  | "405"   ; 找不到处理方法              service方法不符合规范,如:方法名
+				  | "500"   ; Internal Server Error       描述文件写错,如:类名不正确;源代码有问题,如:没有继承HttpServlet
+				  | "501"   ; Not Implemented
+				  | "502"   ; Bad Gateway
+				  | "503"   ; Service Unavailable
+				  | extension-code
+					  
+					
+		
+5.http协议(了解)
+	1.什么是http协议?
+		网络应用层协议,规定了浏览器与web服务器之间如何通信以及相应的数据包的格式
+			tcp/ip 传输,网络
+	2.如何通信
+		1.建立连接
+		2.发送请求数据包
+		3.发送响应数据包
+		4.关闭连接
+		一次请求,一次连接.如果浏览器要向服务器发送新的请求,就需要重新建立新的连接
+		优点:服务器可以利用有限的连接为尽可能多的请求服务
+		
+	3.数据包的格式
+		1.请求数据包
+			1.请求行:请求类型 请求资源路径 协议类型和版本
+				GET /servlet-day01/hello_form.html HTTP/1.1
+			2.消息头(请求头/报头):
+				若干,键值对,由http协议规定其含义,浏览器和服务器之间可以利用消息头来传递一些特定的消息,比如浏览器可以通过
+					发送"user-agent"消息头来告诉服务器,浏览器的类型和版本
+				Host: localhost:8081
+				Connection: keep-alive
+				User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36
+				Upgrade-Insecure-Requests: 1
+				Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
+				Accept-Encoding: gzip, deflate, br
+				Accept-Language: zh-CN,zh;q=0.8
+				Cookie: Idea-dd93d05b=88ac8a20-f6ce-46b8-8c92-c7400f6e8ecc
+			3.实体内容
+				只有当请求类型为post时,实体内容才会有数据
+				
+		2.响应数据包
+			1.状态行:协议类型和版本 状态码 状态描述
+				HTTP/1.1 200 OK
+			2.若干消息头(响应头):
+				服务器也可以发送一些消息头给浏览器,比如发送content-type消息头,告诉浏览器,服务器返回的数据的类型(MIME类型)
+				Server: Apache-Coyote/1.1
+				Accept-Ranges: bytes
+				ETag: W/"316-1507795960883"
+				Last-Modified: Thu, 12 Oct 2017 08:12:40 GMT
+				
+				Content-Type: text/html
+				Content-Length: 316
+				Date: Thu, 12 Oct 2017 08:24:23 GMT
+				
+			3.实体内容(响应正文):
+				程序处理的结果,浏览器会解析出来,然后生成相应的页面
+	4.请求类型:
+			1.get请求
+				1.哪些情况下,浏览器会发送get请求?
+					直接在浏览器地址栏输入某个地址
+					点击链接
+					表单默认的提交方式
+				2.特点
+					会将请求参数添加到请求资源路径的后面,只能提交少量的数据给服务器
+						注:请求行大约只能存放2k左右的数据
+					会将请求参会显示在浏览器地址栏,不安全
+						注:比如路由器就会记录请求地址(包含了请求参数)
+			1.post请求
+				1.哪些情况下,浏览器会发送post请求?
+					将表单的method属性设置为"post"
+				2.特点
+					会将请求参数放到实体内容里面,能够提交大量的数据给服务器
+					不会将请求参数显示在浏览器地址栏,相对安全
+						注:post请求和get请求都不会对请求参数加密
+
+	
+练习:
+	计算一个人的bmi指数:
+		规则:
+			bmi指数 = 体重(公斤) / 身高(米) / 身高(米)
+			如果bmi指数<19 过轻
+			如果bmi指数>25 过重
+			否则正常
+	
+	
+	
+	
+	Servlet
+		扩展web服务器功能的规范
+		组件:
+			符合规范,实现部分功能,部署到容器
+		容器:
+			符合规范,提供组件的运行环境
+		how:
+			Servlet接口,HTTPServlet类
+			编译 javac
+			打包
+				appname 应用名
+					WEB-INF
+						classes
+						lib(.jar)
+						web.xml
+			部署 
+				.war   ---->容器
+			启动容器
+				http://ip/port/appname/url-pattern
+		运行过程:
+			
+	
+	
+	1.Servlet输出中文
+		1.为什么会有乱码?
+			out.println方法在输出时,默认会使用ISO-8859-1来编码
+	
+	
+	2.读取请求参数:
+		1.String request.getParameter(String parameter)
+			1.如果请求参数名写错,会获得null值
+			2.对于表单(文本输入框),如果什么都不填写,会获得""
+		2.String[] request.getParameterValues(String parameter)
+			1.当有多个请求参数名相同,应该用该方法
+			2.对于多选框,如果一个都不选择,会获得null值
+			
+		3.表单包含有中文参数值,如何处理?
+			1.为什么会有乱码
+				表单提交时,浏览器会对表单中的中文参数值进行编码
+				(注:会使用表单所在的页面打开时使用的字符集来编码)
+				服务器端默认会使用ISO-8859-1来解码,所以会产生乱码
+			2.如何解决?
+				1.post请求
+					request.setCharacterEncoding(String charset)
+					注:
+						1.要加到所有的getParameter方法前面
+						2.该方法只针对post请求有效
+			
+				2.get请求
+					URIEncoding
+			
+			
+			
+			
+			
+	1.重定向
+		1.什么是重定向
+			服务器通知浏览器向一个地址发送请求
+				注:
+					服务器可以发送302状态码Location消息头(值是一个地址,称之为重定向地址),
+					浏览器收到之后,会向重定向地址发送请求
+		2.如何重定向
+			response.sendRedirect(String url);
+				注:
+					1.url就是重定向地址
+					2.重定向之前,服务器(容器)会清空response对象上存放的所有数据
+					
+		3.特点:
+			1.重定向的地址是任意的
+			2.重定向之后,浏览器地址栏的地址会发生变化
+			
+---------day04-------------
+			
+1.容器如何处理请求资源路径
+	比如:浏览器地址栏输入
+	http://ip/port/appname/abc.html
+		1.默认访问的是一个servlet,会从web.xml中去查找有没有匹配的servlet
+			web.xml --->utl-pattern
+			匹配规则:	
+				1.精确匹配  <url-pattern>/abc.html</url-pattern>
+				2.通配符匹配(使用*匹配0个或多个字符,比如)
+					<url-pattern>/*</url-pattern>
+					<url-pattern>/abc/*</url-pattern>
+				3.后缀匹配 (以*.开头,后接上任意的字符,比如)
+					<url-pattern>*.do</url-pattern>
+						匹配所有以.do结尾的请求
+						
+		2.如果没有匹配的servlet,则查找对应的文件
+2.让一个servlet处理多个请求
+	1.采用后缀匹配,比如
+		<url-pattern>*.do</url-pattern>
+	2.分析请求资源路径,依据分析的结果来进行不同的处理
+	
+3.servlet的生命周期
+	1.定义:
+		容器如何创建一个servlet对象,初始化,调用,销毁...
+	2.阶段:
+		1.实例化:
+			1.定义:
+				容器调用servlet的构造器创建对应的对象
+			2.什么时候实例化:
+				1.默认情况下,容器收到请求之后,才会创建其实例
+				2.容器只会创建一个实例(单例)
+				3.容器启动之后,立即创建其实例(需要额外配置)
+		2.初始化
+			1.定义:
+				实例化之后,容器调用该实例的init方法.
+				该方法只会调用一次
+			2.GenericServlet已经提供了init方法的实现 
+				会将容器传递过来的ServletConfig对象保存下来
+				并且提供了一个getServletConfig方法
+			3.初始化参数
+				1.配置(web.xml)
+				2.调用ServletConfig提供的getInitParameter方法
+			4.可以重写override GenericServlet提供的init方法来实现自己的初始化处理逻辑
+				注:建议重写init(),而不是init(ServletConfig config) ---钩子方法
+			
+		3.调用(就绪)
+			1.定义:
+				容器收到请求之后,会调用Servlet实例的service方法来处理请求
+			2.HttpServlet已经实现了service方法
+				依据对应的来调用对应的doXXX方法
+					get请求  doGet方法
+					post请求  doPost方法
+			3.可以override HttpServlet的service方法
+				或者override HttpServlet的doGet,doPost方法来处理逻辑
+					
+		4.销毁
+			1.定义:
+				容器在删除Servlet实例之前,会调用该实例的destroy方法
+				(destory方法只会执行一次)
+			2.可以覆盖override GenericServlet提供的destory方法来实现自己的销毁处理逻辑
+	3.相关的接口和类
+		1.servlet接口
+			init(ServletConfig config)
+			service(ServletRequest req,ServletResponse resp)
+			destory()
+				注:	HttpServletRequest是ServletRequest的子接口
+					HttpServletResponse是ServletResponse的子接口
+		2.GengericServlet抽象类
+			实现Servlet接口中的部分方法(init,destory)
+		3.HttpServlet抽象类
+			继承了GengericServlet抽象类，主要实现了service方法
+			主要抛出了异常
+			
+				扩展:
+					javax.servlet
+						接口和类与具体协议无关的
+					javax.servlet.http
+						接口和类与具体协议有关的
+						
+					javax.servlet.xxx(为其他协议,然后并没有)
+						过度设计
+			
+	4.jsp(java server page)
+		1.定义:
+			sun公司制定的一种服务器端动态页面技术规范
+			注:	
+				jsp是一个以.jsp为后缀的文件,该文件的内容主要是html和少量的java代码,
+				容器会将这个文件转换为一个对应的Servlet然后执行(即jsp的本质就是一个Servlet)
+		2.如何写
+			1.写一个以.jsp为后缀的文件
+			2.在该文件中可以添加如下内容
+				1.html(css,js):直接写
+				2.java代码:
+					1.java代码片段:
+						<%   java 代码   %>
+					2.jsp表达式
+						<%=  java表格式 %>
+				3.隐含对象
+					1.定义:
+						jsp文件里可以直接使用的对象(如:out.request,response)
+					2.为什么可以直接使用这些隐含对象?
+						容器会自动添加获得这些对象的代码
+				4.指令:
+					1.定义:
+						通知容器,在将jsp文件转换成servlet类时,做一些额外的处理,比如导包
+					2.page指令
+						import属性:指定要导入的包,比如:
+							<%@ page import="java.util.*,java.text.*"%>>
+						3.contentType="text/html;charset=utf-8" 
+						  pageEncoding="utf-8"
+					3.include指令
+						file属性:指定被包含的文件
+						告诉容器,再将jsp转换成servlet类时,在该指令所在的位置插入对应的文件的内容
+		3.jsp是如何执行的:
+			1.容器先将jsp文件转换成一个对应的Servlet类(.java文件)
+				html(css,js)---------->service方法里,使用out.write输出
+				<%  %>            ---->service方法里,照搬
+				<%= %>         ------->service方法里,out.println()输出
+			2.容器调用该Servlet来处理请求(包括编译,实例化...)
+		
+
+--------------------day04----------------------		
+	2.转发:
+		1.定义:
+			一个web组件将未完成的任务交给另外一个web组件继续做
+			通常是一个servlet将数据获取之后转交给一个jsp来实现
+			注:web组件指的是servlet或者是jsp
+		2.如何转发:	
+			1.将数据绑定到request对象上面
+				request.setAttribute(String name,Object obj);
+					注:name:绑定名 obj:绑定值
+					//依据绑定名获取绑定值
+					Object obj = request.getAttribute(String name)
+			2.获得一个转发器
+				RequestDispatcher rd = request.getRequestDispatcher(String url);
+				注:url:转发的目的地,比如一个jsp
+			3.转发
+				rd.forward(request,response)
+				注:
+					转发的本质是一个web组件通知容器去调用另外一个web组件(即调用service方法),
+					所以需要传递request和response
+
+		3.特点:
+			1.转发的目的地有限制,要求是同一个web应用中的某个地址
+			2.转发之后,浏览器的地址栏的地址不变
+			
+		4.比较重定向和转发
+			1.转发所涉及的各个web组件可以共享request和response,重定向不可以.
+			注:
+				request和response的生存时间并不长,当服务器收到请求之后,会立即创建这两个对象,
+				当响应发送完毕,会立即销毁这两个对象,即这两个对象的生存时间为一次请求和响应期间存在
+			2.转发之后,地址栏不变,而重定向会变
+			3.转发的目的地有限制(同一个web应用),重定向没有限制
+			
+			
+	3.路径问题
+		1.定义
+			链接 表单提交  重定向和转发都需要填写一个路径,比如
+			<form action="add.do">,如何填写这个路径
+		2.相对路径
+			1.定义
+				不以"/"开头的路径
+		3.绝对路径
+			1.定义
+				以"/"开头的路径
+			2.如何写绝对路径    ----使用绝对路径
+				链接/表单提交/重定向从应用名开始写,
+				转发从应用名之后开始写
+					注:	
+						不要直接将应用名写在路径里面,应该使用
+						request.getContextPath()来获取应用名
+							
+			
+			
+-------------------------------day05--------------------------	
+
+1.状态管理:
+		1.定义:
+			将浏览器与web服务器之间多次交互当做一个整体来处理,并且将多次交互所涉及的数据
+			(即状态)保存下来
+		2.如何进行
+			1.将状态保存在客户端
+				将状态保存在浏览器这边,通常使用Cookie技术
+			2.将状态保存在服务器端(session 会话)
+		3.Cookie
+			1.定义:
+				服务器为了识别用户身份临时存放在浏览器端的少量数据
+			2.工作原理
+				浏览器访问服务器时,服务器将一些数据以set-cookie消息头的形式发送该浏览器,
+				浏览器会将这些数据临时保存下来;当浏览器再次访问服务器时,会将这些数据以cookie
+				消息头的形式发送给服务器
+			3.添加Cookie
+				Cookie c = new Cookie(String name, String value)
+				注:	name: cookie名称
+					value: cookie值
+				response.addCookid(c)
+			4.读取Cookie
+				Cookie[] request.getCookies();
+				注: 有可能返回null
+				String cookie.getName();
+				String cookie.getValue();
+				
+			5.编码问题
+				1.cookie只能存放合法的ASCII字符
+				2.如果要存放中文,可以将中文转换成合法的ASCII字符形式
+					String URLEncoder.encode(String str, String charset);
+					String URLDecoder.decode(String str, String charset);
+					注:
+						建议在添加cookie时,都统一编码,使用以上方法将保存的数据进行处理
+			6.生存时间问题
+				cookie.setMaxAge(int seconds)
+				1.单位是秒
+				2.seconds > 0  :浏览器通常会将cookie保存到硬盘上,超过指定的时间,cookie失效(删除)
+				  seconds = 0  :删除cookie,比如要删除一个名称为city的cookie
+								Cookie c = new Cookie("city","");
+								c.setMaxAge(0);
+								response.addCookie(c);
+				  seconds < 0  :默认值(浏览器会将cookie保存在内存里,浏览器关闭, cookie会被删除)
+				  
+			7.cookie的路径问题
+				1.定义:
+					浏览器访问服务器上的某个地址时,会比较请求地址是否符合cookie的路径要求,
+					只有符合要求的cookie才会被发送
+				2.cookie的默认路径
+					等于添加该cookie的web组件的路径
+						比如/servlet-day06/biz01/addCookie.jsp添加了一个cookie,
+						则该cookie的默认路径就是这个"/servlet-day06/biz01"
+				3.匹配规则	
+					要访问的地址必须是cookie的路径或者其子路径
+						比如:cookie的路径是"/servlet-day06/biz01",则
+						/servlet-day06/findCookie1.jsp                no
+						/servlet-day06/biz01/findCookie2.jsp          yes
+						/servlet-day06/biz01/aaa/findCookie3.jsp      yes
+				4.设置路径
+					cookie.setPath(String path);
+			8.cookie的限制
+				1.cookie不安全,(对于敏感数据要加密处理).
+				2.cookie可以被用户禁止
+				3.cookie只能保存少量数据(大约10k左右)
+				4.浏览器保存cookie的数量有限制(大约几百个)
+				cookie只能保存字符串
+					
+	4.session(会话)
+		1.定义:
+			服务器端为了保存状态而创建的一个特殊的对象
+		2.工作原理
+			浏览器访问服务器时,服务器创建一个特殊对象session
+			(该对象有一个唯一的id,称之为sessionId),服务器会将session以cookie的形式发送给浏览器
+			当浏览器再次访问服务器时,会将sessionId发送过来,
+			服务器端可以利用这个session找到对应的session对象
+		3.如何获得session对象
+			方式一:	
+				HTTPSession session  = request.getSession(boolean flag);
+					当flag为true时,先查看请求当中有没有sessionId,
+				如果没有,则创建一个session对象;
+				如果有,依据sessionId查找对应的session对象
+				如果找到了则返回,找不到会创建一个新的session对象
+					当flag为false时,先查看请求当中有没有sessionId,
+				如果没有,则返回null;
+				如果有,依据sessionId查找对应的session对象
+				如果找到了则返回,找不到返回null
+			方式二:
+				HTTPSession session  = request.getSession();
+				等价于request.getSession(true);
+			
+		4.几个方法:
+			1.String session.getId()
+			  setAttribute(String name,Object obj)
+			  Object getAttribute(String name)
+			  removeAttribute(String name);//解除绑定
+			  
+		5.session超时
+			1.服务器会将空闲时间过长的session对象删除掉
+				注:
+					这样做的好处,是为了节省内存空间的占用
+					服务器默认的超时限制一般是30分钟
+			2.可以修改web.xml配置,设置超时限制
+				<session-config>
+					<session-timeout>30</session-timeout>
+				</session-config>
+			3.setMaxInactiveInterval(int seconds)  
+				设置两次请求之间的最大间隔时间,
+				如果超过了这个时间,而服务器会销毁session对象
+		6.删除session
+			1.invalidate()
+				
+			
+			
+			
+			
+			
+		1.建表 t_user
+			create table t_user(
+				id number(8) primary key,
+				username varchar2(50) unique,
+				password varchar2(50),
+				name varchar2(100),
+				gender char(1)
+			);
+			
+			create sequence t_user_seq;
+			insert into t_user
+			values(t_user_seq.nextval,'King','1234','Giving King','m');
+			commit;
+			
+			2.实体类 User
+			3.DAO类
+			4.login.jsp
+			5.ActionServlet(后缀匹配)
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+	
+	
+	

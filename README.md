@@ -1,5 +1,5 @@
 # 我的小代码
-我的个人博客:[huo920.top](www.huo920.top)  
+我的个人博客:[huo920.top](http://huo920.top)  
 
 CSND博客:[http://blog.csdn.net/huo920](http://blog.csdn.net/huo920)
 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <filter>
+  		<filter-name>filterA</filter-name>
+  		<filter-class>web.CommentFilter</filter-class>
+  		<!-- 配置初始化参数 -->
+  		<init-param>
+  			<param-name>illegal</param-name>
+  			<param-value>猫</param-value>
+  		</init-param>
+  </filter>
+  <filter>
+  		<filter-name>filterB</filter-name>
+  		<filter-class>web.CommentFilter2</filter-class>
+  		<!-- 配置初始化参数 -->
+  		<init-param>
+  			<param-name>size</param-name>
+  			<param-value>10</param-value>
+  		</init-param>
+  </filter>
+  <filter-mapping>
+  		<filter-name>filterB</filter-name>
+  		<url-pattern>/comment</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+  		<filter-name>filterA</filter-name>
+  		<url-pattern>/comment</url-pattern>
+  </filter-mapping>
+  <servlet>
+    <servlet-name>CommentServlet</servlet-name>
+    <servlet-class>web.CommentServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CommentServlet</servlet-name>
+    <url-pattern>/comment</url-pattern>
+  </servlet-mapping>
+  
+</web-app>

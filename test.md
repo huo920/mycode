@@ -62,7 +62,7 @@ contentType="text/html; charset=utf-8" %>
 </html>
 ```
 ## 3.如何写一个过滤器
->1.写一个`CommentFilter.java`类,实现filter接口,在接口方法中,实现拦截处理逻辑
+> 1.写一个`CommentFilter.java`类,实现filter接口,在接口方法中,实现拦截处理逻辑
 
 ```java
 public class CommentFilter implements Filter{
@@ -116,8 +116,9 @@ public class CommentFilter implements Filter{
 }
 ```
 
-2.配置过滤器(web.xml)
-``XML
+> 2.配置过滤器(web.xml)
+
+```xml
 <filter>
   		<filter-name>filterA</filter-name>
   		<filter-class>web.CommentFilter</filter-class>
@@ -126,17 +127,20 @@ public class CommentFilter implements Filter{
   		<filter-name>filterA</filter-name>
   		<url-pattern>/comment</url-pattern>
   </filter-mapping>
-  ```
+  ```     
+ 
+ 
+ > 3.初始化参数  
+ 
+1.在`<filter>`中配置初始化参数(init-param)  
 
-3.初始化参数
->1.在`<filter>`中配置初始化参数(init-param)
 ```xml
-      <!-- 配置初始化参数 -->
-  		<init-param>
-  			<param-name>illegal</param-name>
-  			<param-value>猫</param-value>
-  		</init-param>
-```
+<init-param>
+	<param-name>illegal</param-name>
+	<param-value>猫</param-value>
+</init-param>
+```  
+
 2.FilterConfig提供的getInitParameter方法来读取初始化参数的值
 
 ```java
